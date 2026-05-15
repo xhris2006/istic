@@ -2,7 +2,7 @@
 import Link from "next/link";
 import BottomNav from "@/components/layout/BottomNav";
 import Logo from "@/components/ui/Logo";
-import { Shield, Zap, Globe, ArrowRight } from "lucide-react";
+import { Shield, Zap, Globe, ArrowRight, Coins, Check, Trophy } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -78,7 +78,7 @@ export default function HomePage() {
                 borderRadius: "99px", padding: "7px 18px", color: "white", fontSize: ".8rem", fontWeight: 700,
                 boxShadow: "var(--shadow-gold)",
               }}>
-                ✓ Vote sécurisé &amp; transparent
+                <Check size={14} style={{ marginRight: 4 }} /> Vote sécurisé &amp; transparent
               </div>
             </div>
             {/* Sparkles */}
@@ -127,9 +127,9 @@ export default function HomePage() {
               width: 48, height: 48,
               background: "linear-gradient(135deg,#F0C040,#C9950A)",
               borderRadius: "50%", display: "flex", alignItems: "center",
-              justifyContent: "center", flexShrink: 0, fontSize: "1.4rem",
+              justifyContent: "center", flexShrink: 0,
               boxShadow: "var(--shadow-gold)",
-            }}>🪙</div>
+            }}><Coins size={22} color="white" /></div>
             <div>
               <div style={{ fontSize: ".68rem", color: "rgba(201,168,130,.7)", fontWeight: 600, letterSpacing: ".05em", textTransform: "uppercase", marginBottom: 2 }}>
                 Prix du vote
@@ -144,8 +144,8 @@ export default function HomePage() {
           </div>
 
           {/* CTA secondary */}
-          <Link href="/classement" className="btn btn-outline" style={{ marginBottom: 24 }}>
-            Voir le classement en direct 🏆
+          <Link href="/classement" className="btn btn-outline" style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
+            <Trophy size={16} /> Voir le classement en direct
           </Link>
         </section>
       </div>

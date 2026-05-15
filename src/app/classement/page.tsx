@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import BottomNav from "@/components/layout/BottomNav";
-import { RefreshCw, TrendingUp, Share2, Check } from "lucide-react";
+import { RefreshCw, TrendingUp, Share2, Check, Users, User, Trophy } from "lucide-react";
 import type { RankingEntry } from "@/types";
 import { APP_URL } from "@/lib/constants";
 
-const MEDAL = ["🥇", "🥈", "🥉"];
+const MEDAL_COLORS = ["linear-gradient(135deg,#F0C040,#C9950A)", "#9CA3AF", "#CD7F32"];
 
 function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return (
@@ -120,7 +120,7 @@ export default function ClassementPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, padding: "0 4px" }}>
             <span style={{ fontSize: ".82rem", color: "var(--gray-400)", fontWeight: 500 }}>Total des votes</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: "1.25rem" }}>👥</span>
+              <Users size={20} color="var(--gold)" />
               <span style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 900, color: "var(--gold)" }}>
                 {totalVotes.toLocaleString("fr-FR")}
               </span>
@@ -151,13 +151,11 @@ export default function ClassementPage() {
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px" }}>
                     {/* Rank */}
-                    <div style={{
-                      width: 30, textAlign: "center", flexShrink: 0,
-                      fontSize: idx < 3 ? "1.35rem" : ".95rem",
-                      fontWeight: 900,
-                      color: idx < 3 ? undefined : "var(--gray-400)",
-                    }}>
-                      {idx < 3 ? MEDAL[idx] : entry.rank}
+                    <div style={{ width: 30, textAlign: "center", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {idx < 3
+                        ? <div style={{ width: 28, height: 28, borderRadius: "50%", background: MEDAL_COLORS[idx], display: "flex", alignItems: "center", justifyContent: "center" }}><Trophy size={13} color="white" /></div>
+                        : <span style={{ fontSize: ".95rem", fontWeight: 900, color: "var(--gray-400)" }}>{entry.rank}</span>
+                      }
                     </div>
 
                     {/* Avatar */}
@@ -173,7 +171,7 @@ export default function ClassementPage() {
                     }}>
                       {entry.photoUrl && !entry.photoUrl.startsWith("/placeholder")
                         ? <img src={entry.photoUrl} alt={entry.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        : "👩"
+                        : <User size={20} color="rgba(201,168,130,.5)" />
                       }
                     </div>
 

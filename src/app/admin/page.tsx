@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Vote, Banknote, Clock, Users, AlertTriangle, Trophy, Globe } from "lucide-react";
 
 interface Stats {
   candidateCount: number;
@@ -11,36 +12,15 @@ interface Stats {
   confirmedCount: number;
   failedCount: number;
   recentTransactions: Array<{
-    id: string;
-    amount: number;
-    voteCount: number;
-    status: string;
-    isEuropeWire: boolean;
-    createdAt: string;
+    id: string; amount: number; voteCount: number; status: string;
+    isEuropeWire: boolean; createdAt: string;
     candidate: { name: string; number: number };
   }>;
-  topCandidates: Array<{
-    id: string;
-    name: string;
-    number: number;
-    filiere: string;
-    voteCount: number;
-  }>;
+  topCandidates: Array<{ id: string; name: string; number: number; filiere: string; voteCount: number }>;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "#F59E0B",
-  CONFIRMED: "#10B981",
-  FAILED: "#EF4444",
-  EXPIRED: "#9E9C91",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "En attente",
-  CONFIRMED: "Confirmé",
-  FAILED: "Échoué",
-  EXPIRED: "Expiré",
-};
+const STATUS_COLORS: Record<string, string> = { PENDING: "#F59E0B", CONFIRMED: "#10B981", FAILED: "#EF4444", EXPIRED: "#9E9C91" };
+const STATUS_LABELS: Record<string, string> = { PENDING: "En attente", CONFIRMED: "Confirmé", FAILED: "Échoué", EXPIRED: "Expiré" };
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -49,162 +29,100 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetch("/api/admin/stats")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success) setStats(d.data);
-        else setError(d.error);
-      })
+      .then(r => r.json())
+      .then(d => { if (d.success) setStats(d.data); else setError(d.error); })
       .catch(() => setError("Erreur de connexion"))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", fontWeight: 900, marginBottom: 8, color: "#1A1914" }}>Dashboard</h1>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ height: 100, background: "#EEEDE8", borderRadius: 16, animation: "pulse 1.5s ease infinite" }} />
-          ))}
-        </div>
+  if (loading) return (
+    <div>
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", fontWeight: 900, marginBottom: 20, color: "#1A1914" }}>Dashboard</h1>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 16, marginBottom: 24 }}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} style={{ height: 100, background: "#EEEDE8", borderRadius: 16, animation: "pulse 1.5s ease infinite" }} />
+        ))}
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (error) {
-    return <div style={{ color: "#EF4444", padding: 24 }}>Erreur: {error}</div>;
-  }
-
+  if (error) return <div style={{ color: "#EF4444", padding: 24 }}>Erreur: {error}</div>;
   if (!stats) return null;
 
   const kpis = [
-    { label: "Total Votes", value: stats.totalVotes.toLocaleString("fr-FR"), icon: "🗳️", color: "#C9950A" },
-    { label: "Revenus (FCFA)", value: stats.revenue.toLocaleString("fr-FR"), icon: "💰", color: "#10B981" },
-    { label: "En attente", value: stats.pendingCount, icon: "⏳", color: "#F59E0B", alert: stats.pendingEuropeCount > 0 },
-    { label: "Candidats", value: stats.candidateCount, icon: "👥", color: "#6366F1" },
+    { label: "Total Votes",     value: stats.totalVotes.toLocaleString("fr-FR"), Icon: Vote,     color: "#C9950A" },
+    { label: "Revenus (FCFA)",  value: stats.revenue.toLocaleString("fr-FR"),    Icon: Banknote,  color: "#10B981" },
+    { label: "En attente",      value: stats.pendingCount,                        Icon: Clock,     color: "#F59E0B", alert: stats.pendingEuropeCount > 0 },
+    { label: "Candidats",       value: stats.candidateCount,                      Icon: Users,     color: "#6366F1" },
   ];
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", fontWeight: 900, color: "#1A1914", lineHeight: 1.1 }}>
-            Dashboard
-          </h1>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", fontWeight: 900, color: "#1A1914", lineHeight: 1.1 }}>Dashboard</h1>
           <div style={{ fontSize: ".82rem", color: "#9E9C91", marginTop: 4 }}>
             {new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </div>
         </div>
         {stats.pendingEuropeCount > 0 && (
-          <Link href="/admin/transactions?status=PENDING" style={{
-            display: "flex", alignItems: "center", gap: 8,
-            background: "#FEF3C7", border: "1.5px solid #FCD34D",
-            borderRadius: "99px", padding: "9px 16px",
-            textDecoration: "none", fontSize: ".82rem", fontWeight: 700, color: "#92400E",
-          }}>
-            ⚠️ {stats.pendingEuropeCount} virement(s) à valider
+          <Link href="/admin/transactions?status=PENDING" style={{ display: "flex", alignItems: "center", gap: 8, background: "#FEF3C7", border: "1.5px solid #FCD34D", borderRadius: "99px", padding: "9px 16px", textDecoration: "none", fontSize: ".82rem", fontWeight: 700, color: "#92400E" }}>
+            <AlertTriangle size={14} /> {stats.pendingEuropeCount} virement(s) à valider
           </Link>
         )}
       </div>
 
       {/* KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
-        {kpis.map(({ label, value, icon, color, alert }) => (
-          <div key={label} style={{
-            background: "white",
-            borderRadius: 16,
-            padding: "20px 22px",
-            boxShadow: "0 2px 12px rgba(0,0,0,.06)",
-            border: alert ? "1.5px solid #FCD34D" : "1.5px solid transparent",
-            position: "relative",
-          }}>
-            {alert && (
-              <div style={{
-                position: "absolute", top: -6, right: -6,
-                width: 20, height: 20, borderRadius: "50%",
-                background: "#EF4444", color: "white",
-                fontSize: ".65rem", fontWeight: 900,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>!</div>
-            )}
-            <div style={{ fontSize: "1.5rem", marginBottom: 8 }}>{icon}</div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 900, color, lineHeight: 1 }}>
-              {value}
-            </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 16, marginBottom: 28 }}>
+        {kpis.map(({ label, value, Icon, color, alert }) => (
+          <div key={label} style={{ background: "white", borderRadius: 16, padding: "20px 22px", boxShadow: "0 2px 12px rgba(0,0,0,.06)", border: alert ? "1.5px solid #FCD34D" : "1.5px solid transparent", position: "relative" }}>
+            {alert && <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "#EF4444", color: "white", fontSize: ".65rem", fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center" }}>!</div>}
+            <div style={{ marginBottom: 8 }}><Icon size={22} color={color} /></div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 900, color, lineHeight: 1 }}>{value}</div>
             <div style={{ fontSize: ".75rem", color: "#9E9C91", marginTop: 4, fontWeight: 500 }}>{label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 20, marginBottom: 24 }}>
         {/* Transactions récentes */}
         <div style={{ background: "white", borderRadius: 16, padding: "20px 22px", boxShadow: "0 2px 12px rgba(0,0,0,.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div style={{ fontWeight: 700, fontSize: ".95rem", color: "#1A1914" }}>Transactions récentes</div>
-            <Link href="/admin/transactions" style={{ fontSize: ".75rem", color: "#C9950A", fontWeight: 600, textDecoration: "none" }}>
-              Voir tout →
-            </Link>
+            <Link href="/admin/transactions" style={{ fontSize: ".75rem", color: "#C9950A", fontWeight: 600, textDecoration: "none" }}>Voir tout →</Link>
           </div>
-          <div>
-            {stats.recentTransactions.map((tx) => (
-              <div key={tx.id} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "10px 0", borderBottom: "1px solid #F7F7F5",
-              }}>
-                <div>
-                  <div style={{ fontSize: ".84rem", fontWeight: 600, color: "#1A1914" }}>
-                    {tx.candidate.name}
-                    {tx.isEuropeWire && <span style={{ marginLeft: 6, fontSize: ".65rem", background: "#EFF6FF", color: "#2563EB", padding: "2px 6px", borderRadius: "99px", fontWeight: 700 }}>🇪🇺</span>}
-                  </div>
-                  <div style={{ fontSize: ".72rem", color: "#9E9C91" }}>
-                    {tx.voteCount} vote{tx.voteCount > 1 ? "s" : ""} · {(tx.amount).toLocaleString("fr-FR")} FCFA
-                  </div>
+          {stats.recentTransactions.map(tx => (
+            <div key={tx.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #F7F7F5" }}>
+              <div>
+                <div style={{ fontSize: ".84rem", fontWeight: 600, color: "#1A1914" }}>
+                  {tx.candidate.name}
+                  {tx.isEuropeWire && <span style={{ marginLeft: 6, fontSize: ".65rem", background: "#EFF6FF", color: "#2563EB", padding: "2px 6px", borderRadius: "99px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 2 }}><Globe size={9} /> EU</span>}
                 </div>
-                <span style={{
-                  background: STATUS_COLORS[tx.status] + "20",
-                  color: STATUS_COLORS[tx.status],
-                  borderRadius: "99px",
-                  padding: "3px 10px",
-                  fontSize: ".7rem",
-                  fontWeight: 700,
-                }}>
-                  {STATUS_LABELS[tx.status]}
-                </span>
+                <div style={{ fontSize: ".72rem", color: "#9E9C91" }}>{tx.voteCount} vote{tx.voteCount > 1 ? "s" : ""} · {tx.amount.toLocaleString("fr-FR")} FCFA</div>
               </div>
-            ))}
-          </div>
+              <span style={{ background: STATUS_COLORS[tx.status] + "20", color: STATUS_COLORS[tx.status], borderRadius: "99px", padding: "3px 10px", fontSize: ".7rem", fontWeight: 700 }}>
+                {STATUS_LABELS[tx.status]}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Top candidats */}
         <div style={{ background: "white", borderRadius: 16, padding: "20px 22px", boxShadow: "0 2px 12px rgba(0,0,0,.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div style={{ fontWeight: 700, fontSize: ".95rem", color: "#1A1914" }}>Top candidats</div>
-            <Link href="/admin/candidats" style={{ fontSize: ".75rem", color: "#C9950A", fontWeight: 600, textDecoration: "none" }}>
-              Gérer →
-            </Link>
+            <Link href="/admin/candidats" style={{ fontSize: ".75rem", color: "#C9950A", fontWeight: 600, textDecoration: "none" }}>Gérer →</Link>
           </div>
           {stats.topCandidates.map((c, i) => (
-            <div key={c.id} style={{
-              display: "flex", alignItems: "center", gap: 12,
-              padding: "10px 0", borderBottom: i < stats.topCandidates.length - 1 ? "1px solid #F7F7F5" : "none",
-            }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: "50%",
-                background: i === 0 ? "linear-gradient(135deg,#F0C040,#C9950A)" : i === 1 ? "#E5E7EB" : "#FEF3C7",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: ".9rem", fontWeight: 900, color: i === 0 ? "white" : "#374151",
-                flexShrink: 0,
-              }}>
-                {["🥇", "🥈", "🥉"][i] ?? i + 1}
+            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < stats.topCandidates.length - 1 ? "1px solid #F7F7F5" : "none" }}>
+              <div style={{ width: 30, height: 30, borderRadius: "50%", background: i === 0 ? "linear-gradient(135deg,#F0C040,#C9950A)" : i === 1 ? "#E5E7EB" : "#FEF3C7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Trophy size={14} color={i === 0 ? "white" : i === 1 ? "#374151" : "#92400E"} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: ".84rem", fontWeight: 700, color: "#1A1914" }}>{c.name}</div>
                 <div style={{ fontSize: ".72rem", color: "#9E9C91" }}>{c.filiere}</div>
               </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 900, color: "#C9950A" }}>
-                {c.voteCount.toLocaleString("fr-FR")}
-              </div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 900, color: "#C9950A" }}>{c.voteCount.toLocaleString("fr-FR")}</div>
             </div>
           ))}
         </div>
@@ -213,11 +131,11 @@ export default function AdminDashboard() {
       {/* Statuts */}
       <div style={{ background: "white", borderRadius: 16, padding: "20px 22px", boxShadow: "0 2px 12px rgba(0,0,0,.06)" }}>
         <div style={{ fontWeight: 700, fontSize: ".95rem", color: "#1A1914", marginBottom: 16 }}>Statut des transactions</div>
-        <div style={{ display: "flex", gap: 16 }}>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           {[
             { label: "Confirmées", value: stats.confirmedCount, color: "#10B981" },
-            { label: "En attente", value: stats.pendingCount, color: "#F59E0B" },
-            { label: "Échouées", value: stats.failedCount, color: "#EF4444" },
+            { label: "En attente", value: stats.pendingCount,   color: "#F59E0B" },
+            { label: "Échouées",   value: stats.failedCount,    color: "#EF4444" },
           ].map(({ label, value, color }) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: color }} />

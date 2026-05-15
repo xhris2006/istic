@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import BottomNav from "@/components/layout/BottomNav";
 import CurrencyConverter from "@/components/ui/CurrencyConverter";
-import { ArrowLeft, ExternalLink, Smartphone } from "lucide-react";
+import { ArrowLeft, ExternalLink, Smartphone, CheckCircle2, XCircle, Clock, User } from "lucide-react";
 import type { Candidate } from "@/types";
 import { VOTE_PACKS, VOTE_PRICE_FCFA, EUROPE_WIRE } from "@/lib/constants";
 import { formatAmount } from "@/lib/currency";
@@ -182,7 +182,7 @@ function VoterInner() {
     return (
       <div className="shell">
         <div className="page animate-fadeup" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", gap: 20 }}>
-          <div style={{ fontSize: "3rem" }}>⏳</div>
+          <div style={{ width: 64, height: 64, background: "#FEF3C7", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}><Clock size={30} color="#F59E0B" /></div>
           <h2 style={{ fontFamily: "var(--font-display)", textAlign: "center" }}>Patientez {rateLimitSeconds}s</h2>
           <button className="btn btn-outline" onClick={reset} style={{ width: "100%" }}>Revenir</button>
         </div>
@@ -195,7 +195,7 @@ function VoterInner() {
     return (
       <div className="shell">
         <div className="page animate-fadeup" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", gap: 20 }}>
-          <div style={{ width: 90, height: 90, background: "linear-gradient(135deg,#F0C040,#C9950A)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.5rem", boxShadow: "var(--shadow-gold)" }}>✅</div>
+          <div style={{ width: 90, height: 90, background: "linear-gradient(135deg,#F0C040,#C9950A)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-gold)" }}><CheckCircle2 size={44} color="white" /></div>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.8rem", fontWeight: 900, textAlign: "center" }}>Vote confirmé !</h2>
           <p style={{ color: "var(--gray-600)", textAlign: "center" }}>
             <strong style={{ color: "var(--gold)" }}>{paymentData?.voteCount ?? computedVotes} vote(s)</strong>{" "}ajouté(s) pour <strong>{candidate?.name}</strong>
@@ -236,7 +236,7 @@ function VoterInner() {
     return (
       <div className="shell">
         <div className="animate-fadeup" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", gap: 20 }}>
-          <div style={{ fontSize: "3.5rem" }}>❌</div>
+          <div style={{ width: 64, height: 64, background: "#FEF2F2", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}><XCircle size={36} color="#EF4444" /></div>
           <h2 style={{ fontFamily: "var(--font-display)", textAlign: "center" }}>Paiement échoué</h2>
           <p style={{ color: "var(--gray-600)", textAlign: "center", background: "#FEF2F2", padding: "12px 16px", borderRadius: "var(--radius-md)", fontSize: ".9rem" }}>{errorMsg}</p>
           <button className="btn btn-primary" onClick={reset}>Réessayer</button>
@@ -263,7 +263,7 @@ function VoterInner() {
               <div style={{ height: 180, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "6rem", position: "relative", overflow: "hidden" }}>
                 {candidate.photoUrl && !candidate.photoUrl.startsWith("/placeholder")
                   ? <img src={candidate.photoUrl} alt={candidate.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                  : "👩"}
+                  : <User size={48} color="rgba(201,168,130,.4)" />}
               </div>
               <div style={{ padding: "14px 18px 16px" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: "1.3rem", fontWeight: 900, color: "white" }}>{candidate.name}</div>

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import BottomNav from "@/components/layout/BottomNav";
 import { useRouter } from "next/navigation";
-import { Search, Trophy, Share2, Check } from "lucide-react";
+import { Search, Trophy, Share2, Check, User } from "lucide-react";
 import { APP_URL } from "@/lib/constants";
 
 interface Candidate {
@@ -105,7 +105,7 @@ export default function CandidatsPage() {
                     style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
                   />
                 ) : (
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "4rem" }}>👤</div>
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><User size={48} color="rgba(201,168,130,.3)" /></div>
                 )}
 
                 {/* Numéro badge */}
