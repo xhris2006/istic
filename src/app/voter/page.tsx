@@ -4,16 +4,129 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import BottomNav from "@/components/layout/BottomNav";
 import CurrencyConverter from "@/components/ui/CurrencyConverter";
-import { ArrowLeft, ExternalLink, Smartphone, CheckCircle2, XCircle, Clock, User, Lock } from "lucide-react";
+import { ArrowLeft, ExternalLink, Smartphone, CheckCircle2, XCircle, Clock, User, Lock, Copy, Check, Upload } from "lucide-react";
 import type { Candidate } from "@/types";
-import { VOTE_PACKS, VOTE_PRICE_FCFA, EUROPE_WIRE } from "@/lib/constants";
+import { VOTE_PACKS, VOTE_PRICE_FCFA } from "@/lib/constants";
 import { formatAmount } from "@/lib/currency";
+
+const WIRE_NUMBER = "+237690768603";
+const WIRE_NAME   = "Messina bengono";
+const SUPPORT_WA  = "237694600007";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
     </svg>
+  );
+}
+
+function EuropePaySection({
+  candidateName, computedVotes, amountXAF,
+}: { candidateName: string; computedVotes: number; amountXAF: number }) {
+  const [copiedNum, setCopiedNum] = useState(false);
+  const [screenshot, setScreenshot] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function copyNumber() {
+    await navigator.clipboard.writeText(WIRE_NUMBER);
+    setCopiedNum(true);
+    setTimeout(() => setCopiedNum(false), 2000);
+  }
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setScreenshot(reader.result as string);
+    reader.readAsDataURL(f);
+  }
+
+  function handlePaid() {
+    const msg = [
+      `Bonjour, je souhaite voter pour *${candidateName || "..."}*.`,
+      ``,
+      `Votes souhaités : *${computedVotes} vote${computedVotes > 1 ? "s" : ""}*`,
+      `Montant payé : *${amountXAF.toLocaleString("fr-FR")} FCFA*`,
+      `Destinataire : ${WIRE_NAME} (${WIRE_NUMBER})`,
+      ``,
+      `Veuillez trouver ci-joint le reçu de paiement.`,
+      `Merci de créditer les votes après vérification.`,
+    ].join("\n");
+    window.open(`https://wa.me/${SUPPORT_WA}?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
+  return (
+    <div>
+      {/* Bénéficiaire */}
+      <div style={{ background: "white", borderRadius: "var(--radius-lg)", border: "1.5px solid var(--gray-100)", marginBottom: 16, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.06)" }}>
+        <div style={{ background: "var(--gray-50)", padding: "10px 16px", borderBottom: "1px solid var(--gray-100)" }}>
+          <div style={{ fontSize: ".68rem", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--gray-400)" }}>Destinataire du virement</div>
+        </div>
+        <div style={{ padding: "14px 16px" }}>
+          <div style={{ fontWeight: 800, fontSize: "1rem", color: "var(--gray-900)", marginBottom: 6 }}>{WIRE_NAME}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "1rem", color: "var(--gray-900)", letterSpacing: ".04em" }}>{WIRE_NUMBER}</span>
+            <button onClick={copyNumber}
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, background: copiedNum ? "#F0FDF4" : "var(--gray-50)", border: `1px solid ${copiedNum ? "#86EFAC" : "var(--gray-200)"}`, borderRadius: 8, padding: "5px 12px", fontSize: ".78rem", fontWeight: 600, cursor: "pointer", color: copiedNum ? "#16A34A" : "var(--gray-600)", fontFamily: "var(--font-body)", transition: "all .2s" }}>
+              {copiedNum ? <><Check size={12} /> Copié</> : <><Copy size={12} /> Copier</>}
+            </button>
+          </div>
+          <div style={{ fontSize: ".72rem", color: "var(--gray-400)", marginTop: 6 }}>MTN · Orange Money · Virement bancaire</div>
+        </div>
+      </div>
+
+      {/* Montant à payer */}
+      <div style={{ background: "linear-gradient(135deg,#FDF6E3,#FEF3C7)", border: "1.5px solid rgba(201,149,10,.2)", borderRadius: "var(--radius-md)", padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#92400E", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 3 }}>Montant à envoyer</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 900, color: "var(--gold-dark)" }}>
+            {amountXAF.toLocaleString("fr-FR")} FCFA
+          </div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#92400E", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 3 }}>Votes</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 900, color: "var(--gold-dark)" }}>{computedVotes}</div>
+        </div>
+      </div>
+
+      {/* Upload capture */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: ".78rem", fontWeight: 600, color: "var(--gray-600)", marginBottom: 8 }}>
+          Capture du reçu de paiement
+          <span style={{ fontWeight: 400, color: "var(--gray-400)", marginLeft: 4 }}>(optionnel, à joindre sur WhatsApp)</span>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
+        {screenshot ? (
+          <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "2px solid var(--gray-200)" }}>
+            <img src={screenshot} alt="Reçu" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+            <button onClick={() => setScreenshot(null)}
+              style={{ position: "absolute", top: 8, right: 8, width: 30, height: 30, borderRadius: "50%", background: "rgba(0,0,0,.5)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+              <XCircle size={16} />
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => fileRef.current?.click()}
+            style={{ width: "100%", padding: "20px", border: "2px dashed var(--gray-200)", borderRadius: 12, background: "var(--gray-50)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "var(--gray-400)", fontSize: ".88rem", fontFamily: "var(--font-body)" }}>
+            <Upload size={18} /> Sélectionner une image
+          </button>
+        )}
+      </div>
+
+      {/* Instructions */}
+      <div style={{ background: "#F0F9FF", border: "1px solid #BAE6FD", borderRadius: "var(--radius-md)", padding: "12px 16px", marginBottom: 20, fontSize: ".78rem", color: "#0C4A6E", lineHeight: 1.7 }}>
+        <strong>Instructions :</strong> Effectuez le virement au numéro ci-dessus, puis cliquez sur «&nbsp;J&apos;ai payé&nbsp;» pour envoyer votre confirmation par WhatsApp. Joignez la capture dans le message WhatsApp. Les votes seront crédités après vérification.
+      </div>
+
+      {/* CTA */}
+      <button onClick={handlePaid}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", padding: "16px", borderRadius: "var(--radius-xl)", background: "#25D366", color: "white", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer", boxShadow: "0 4px 20px rgba(37,211,102,.35)", marginBottom: 8, fontFamily: "var(--font-body)" }}>
+        <WhatsAppIcon size={22} /> J&apos;ai payé — Envoyer la confirmation
+      </button>
+      <p style={{ textAlign: "center", fontSize: ".72rem", color: "var(--gray-400)", marginBottom: 24 }}>
+        Vous serez redirigé vers WhatsApp avec le message pré-rempli
+      </p>
+    </div>
   );
 }
 
@@ -76,13 +189,6 @@ function VoterInner() {
   }, [useCustom]);
 
   const computedVotes = Math.floor(amountXAF / VOTE_PRICE_FCFA);
-
-  function handleEuropeWire() {
-    const text = encodeURIComponent(
-      `Bonjour, je souhaite voter pour *${candidate?.name}* (${computedVotes} vote${computedVotes > 1 ? "s" : ""}).\n\nMontant : ${formatAmount(amountXAF, "XAF")} FCFA\nDevise payée : ${selectedCurrency}\n\nCi-joint mon reçu de paiement.`
-    );
-    window.open(`${EUROPE_WIRE.whatsappLink}?text=${text}`, "_blank");
-  }
 
   async function handleAfricaPay() {
     if (!candidateId || !phone) return;
@@ -359,21 +465,11 @@ function VoterInner() {
               )}
             </>
           ) : (
-            <>
-              <div style={{ background: "#FFF7ED", border: "2px solid #FED7AA", borderRadius: "var(--radius-lg)", padding: "18px", marginBottom: 20 }}>
-                <div style={{ fontWeight: 700, fontSize: ".9rem", color: "#C2410C", marginBottom: 12 }}>🇪🇺 Instructions de paiement Europe</div>
-                {EUROPE_WIRE.instructions.map((s, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#C2410C", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".7rem", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                    <div style={{ fontSize: ".82rem", color: "#9A3412", lineHeight: 1.5 }}>{s}</div>
-                  </div>
-                ))}
-              </div>
-              <a href={EUROPE_WIRE.whatsappLink} target="_blank" rel="noopener noreferrer" onClick={handleEuropeWire}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px", borderRadius: "var(--radius-xl)", background: "#25D366", color: "white", textDecoration: "none", fontWeight: 700, fontSize: "1rem", boxShadow: "0 4px 20px rgba(37,211,102,.35)", marginBottom: 8 }}>
-                <WhatsAppIcon size={22} /> Envoyer le reçu par WhatsApp
-              </a>
-            </>
+            <EuropePaySection
+              candidateName={candidate?.name ?? ""}
+              computedVotes={computedVotes}
+              amountXAF={amountXAF}
+            />
           )}
         </div>
       </div>

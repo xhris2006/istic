@@ -1,8 +1,7 @@
 "use client";
-// src/components/layout/BottomNav.tsx
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, Trophy } from "lucide-react";
+import { Home, Users, Trophy, HelpCircle } from "lucide-react";
 
 function VoteIcon() {
   return (
@@ -16,8 +15,9 @@ function VoteIcon() {
 const navItems = [
   { href: "/",          label: "Accueil",    icon: Home },
   { href: "/candidats", label: "Candidats",  icon: Users },
-  { href: "/voter",     label: "Voter",      icon: null,  special: true },
+  { href: "/voter",     label: "Voter",      icon: null, special: true },
   { href: "/classement",label: "Classement", icon: Trophy },
+  { href: "/support",   label: "Aide",       icon: HelpCircle },
 ];
 
 export default function BottomNav() {
@@ -30,9 +30,7 @@ export default function BottomNav() {
         return (
           <Link key={href} href={href} className={`nav-item${isActive ? " active" : ""}`}>
             {special ? (
-              <span className="nav-icon-vote">
-                <VoteIcon />
-              </span>
+              <span className="nav-icon-vote"><VoteIcon /></span>
             ) : Icon ? (
               <Icon />
             ) : null}
