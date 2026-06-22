@@ -6,6 +6,9 @@ import BottomNav from "@/components/layout/BottomNav";
 import { ArrowLeft, CheckCircle2, XCircle, User, Heart } from "lucide-react";
 import type { Candidate } from "@/types";
 
+const VOTED_KEY = "mr_voted_date";
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
 function VoterInner() {
   const router = useRouter();
   const params = useSearchParams();
@@ -13,7 +16,7 @@ function VoterInner() {
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<"vote" | "success" | "error">("vote");
+  const [step, setStep] = useState<"vote" | "success" | "error" | "already">("vote");
   const [votingStatus, setVotingStatus] = useState<{ active: boolean; message?: string } | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -22,6 +25,13 @@ function VoterInner() {
       .then(r => r.json())
       .then(d => setVotingStatus(d))
       .catch(() => setVotingStatus({ active: true }));
+  }, []);
+
+  // Limite : un vote par personne et par jour.
+  useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem(VOTED_KEY) === todayStr()) {
+      setStep("already");
+    }
   }, []);
 
   useEffect(() => {
@@ -43,6 +53,12 @@ function VoterInner() {
       });
       const data = await res.json().catch(() => ({ success: false }));
       if (!res.ok || !data.success) {
+        if (data.alreadyVoted) {
+          if (typeof window !== "undefined") localStorage.setItem(VOTED_KEY, todayStr());
+          setStep("already");
+          setLoading(false);
+          return;
+        }
         setErrorMsg((data.error as string) ?? "Impossible d'enregistrer le vote.");
         setStep("error");
         setLoading(false);
@@ -51,6 +67,7 @@ function VoterInner() {
       if (data.data?.voteCount != null) {
         setCandidate(prev => (prev ? { ...prev, voteCount: data.data.voteCount } : prev));
       }
+      if (typeof window !== "undefined") localStorage.setItem(VOTED_KEY, todayStr());
       setStep("success");
       setLoading(false);
     } catch {
@@ -90,6 +107,25 @@ function VoterInner() {
           <div style={{ display: "flex", gap: 12, width: "100%" }}>
             <Link href="/classement" className="btn btn-outline" style={{ flex: 1 }}>Classement</Link>
             <Link href="/candidats" className="btn btn-primary" style={{ flex: 1 }}>Autres candidats</Link>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (step === "already") {
+    return (
+      <div className="shell">
+        <div className="page animate-fadeup" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", gap: 20 }}>
+          <div style={{ width: 90, height: 90, background: "#FEF3C7", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}><CheckCircle2 size={44} color="#C9950A" /></div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", fontWeight: 900, textAlign: "center" }}>Vous avez déjà voté</h2>
+          <p style={{ color: "var(--gray-600)", textAlign: "center" }}>
+            Vous ne pouvez voter qu&apos;une seule fois par jour. Revenez demain pour voter à nouveau !
+          </p>
+          <div style={{ display: "flex", gap: 12, width: "100%" }}>
+            <Link href="/classement" className="btn btn-outline" style={{ flex: 1 }}>Classement</Link>
+            <Link href="/candidats" className="btn btn-primary" style={{ flex: 1 }}>Candidats</Link>
           </div>
         </div>
         <BottomNav />

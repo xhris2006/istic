@@ -8,9 +8,18 @@ const voteSchema = z.object({
   candidateId: z.string().min(1),
 });
 
-// Vote simple et gratuit : un clic = un vote.
+const VOTE_COOKIE = "mr_voted";
+
+// Vote simple et gratuit : un clic = un vote, limité à 1 fois par personne et par jour.
 export async function POST(req: NextRequest) {
   try {
+    const today = new Date().toISOString().slice(0, 10); // AAAA-MM-JJ
+
+    // Un seul vote autorisé par navigateur et par jour.
+    if (req.cookies.get(VOTE_COOKIE)?.value === today) {
+      return NextResponse.json({ success: false, alreadyVoted: true, error: "Vous avez déjà voté aujourd'hui." }, { status: 409 });
+    }
+
     const body = await req.json().catch(() => ({}));
     const parsed = voteSchema.safeParse(body);
     if (!parsed.success) {
@@ -39,7 +48,14 @@ export async function POST(req: NextRequest) {
       select: { id: true, name: true, voteCount: true },
     });
 
-    return NextResponse.json({ success: true, data: candidate });
+    const res = NextResponse.json({ success: true, data: candidate });
+    res.cookies.set(VOTE_COOKIE, today, {
+      maxAge: 60 * 60 * 24, // 24 h : un nouveau jour, on peut revoter
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+    return res;
   } catch (error: unknown) {
     if ((error as { code?: string }).code === "P2025") {
       return NextResponse.json({ success: false, error: "Candidat introuvable" }, { status: 404 });
