@@ -15,10 +15,10 @@ export default function HomePage() {
             <Logo size={44} variant="icon" />
             <div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem", fontWeight: 900, color: "var(--gray-900)", lineHeight: 1 }}>
-                MÉTA REINE
+                REINE DU META
               </div>
               <div style={{ fontSize: ".62rem", fontWeight: 700, color: "var(--gold)", letterSpacing: ".12em", textTransform: "uppercase" }}>
-                META QUEEN
+                BY HELEN
               </div>
             </div>
           </div>
